@@ -58,6 +58,7 @@ EXAMPLES:
 - query_db:
 {"tool": "query_db", "args": {"db_name": "some_db_name", "query": "SELECT * FROM some_table LIMIT some_limit;"}} # for SQL databases
 {"tool": "query_db", "args": {"db_name": "some_db_name", "query": "{\"collection\": \"some_collection\", \"filter\": {some_filter}, \"projection\": {some_projection}, \"limit\": some_limit}"}} # for MongoDB databases
+{"tool": "query_db", "args": {"db_name": "some_db_name", "query": "{\"collection\": \"some_collection\", \"pipeline\": [some_aggregation_stages]}"}} # MongoDB aggregation
 
 - list_db:
 {"tool": "list_db", "args": {"db_name": "some_db_name"}}

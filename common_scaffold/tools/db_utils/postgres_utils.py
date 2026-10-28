@@ -22,6 +22,8 @@ def pg_ident(identifier: str) -> str:
 
 
 def load_db(sql_file: str, db_name: str):
+    if os.getenv("DAB_PERSISTENT_DBS") and check_db_exists(db_name):
+        return
     if check_db_exists(db_name):
         logging.getLogger(__name__).warning(f"Database '{db_name}' already exists. Cleaning up before loading dump.")
         clean_up(db_name)
@@ -91,6 +93,8 @@ def check_db_exists(db_name):
     
 
 def clean_up(db_name):
+    if os.getenv("DAB_PERSISTENT_DBS"):
+        return
     logging.getLogger(__name__).debug(f"Cleaning up PostgreSQL database '{db_name}'")
     try:
         conn = psycopg2.connect(

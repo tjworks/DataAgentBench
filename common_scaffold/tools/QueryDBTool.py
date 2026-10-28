@@ -46,7 +46,7 @@ class QueryDBTool(BaseTool):
                         },
                         "query": {
                             "type": "string",
-                            "description": "The query to execute. For SQL databases, provide a SQL query string. For MongoDB, provide a JSON string representing the query, including `collection` field, and optional `filter`, `projection`, and `limit` fields."
+                            "description": "The query to execute. For SQL databases, provide a SQL query string. For MongoDB, provide a JSON string representing the query, including `collection` field, and optional `filter`, `projection`, and `limit` fields; or `collection` plus `pipeline` (a list of aggregation stages) to run an aggregation instead."
                         }
                     },
                     "required": ["db_name", "query"]

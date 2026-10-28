@@ -1,4 +1,5 @@
 import json
+import os
 import pandas as pd
 from pymongo import MongoClient
 from common_scaffold.tools.db_utils import db_config
@@ -17,6 +18,8 @@ MongoDB Config:
 # Reference: https://www.mongodb.com/docs/manual/administration/install-community/?linux-distribution=ubuntu&linux-package=default&operating-system=linux&search-linux=with-search-linux#start-mongodb-12
 
 def load_db(dump_folder: str, db_name: str):
+    if os.getenv("DAB_PERSISTENT_DBS") and check_db_exists(db_name):
+        return
     if check_db_exists(db_name) == True:
         logging.getLogger(__name__).warning(f"Database '{db_name}' already exists. Cleaning up before loading dump.")
         clean_up(db_name)
@@ -53,6 +56,8 @@ def check_db_exists(db_name):
             raise FatalError(f"MongoDB existence check error ({type(e).__name__}): {str(e)}")
 
 def clean_up(db_name):
+    if os.getenv("DAB_PERSISTENT_DBS"):
+        return
     logging.getLogger(__name__).debug(f"Cleaning up MongoDB database '{db_name}'")
     with MongoClient(db_config.MONGO_URI) as mongo_client:
         try:
@@ -77,17 +82,21 @@ class MongoQueryDBTool:
         collection = query_json["collection"]
         filter = query_json.get("filter", {})
         projection = query_json.get("projection", None)
-        limit = query_json.get("limit", 5)
+        limit = query_json.get("limit", None)  # no silent cap: matches SQL, which returns every row
+        pipeline = query_json.get("pipeline", None)
+        if pipeline is not None and not isinstance(pipeline, list):
+            raise ValueError("Invalid Mongo query: `pipeline` must be a list of aggregation stages")
         return {
             "db_name": db_client['db_name'],
             "collection": collection,
             "filter": filter,
             "projection": projection,
-            "limit": limit
+            "limit": limit,
+            "pipeline": pipeline,
         }
 
     @staticmethod
-    def exec(db_name, collection, filter, projection, limit):
+    def exec(db_name, collection, filter, projection, limit, pipeline=None):
         with MongoClient(db_config.MONGO_URI) as mongo_client:
             db = mongo_client[db_name]
 
@@ -95,10 +104,13 @@ class MongoQueryDBTool:
                 raise ValueError(f"Collection does not exist: {collection}")
         
             try:
-                cursor = db[collection].find(filter, projection)
-                if limit is not None:
-                    cursor = cursor.limit(limit)
-                result = list(cursor)
+                if pipeline is not None:
+                    result = list(db[collection].aggregate(pipeline))
+                else:
+                    cursor = db[collection].find(filter, projection)
+                    if limit is not None:
+                        cursor = cursor.limit(limit)
+                    result = list(cursor)
             except Exception as e:
                 raise ValueError(f"MongoDB query execution error ({type(e).__name__}): {str(e)}")
         
