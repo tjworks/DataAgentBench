@@ -1,0 +1,5 @@
+db_clients:
+  bank_warehouse:
+    db_type: mongo
+    db_name: bank_warehouse
+    dump_folder: query_dataset/bank_warehouse_dump

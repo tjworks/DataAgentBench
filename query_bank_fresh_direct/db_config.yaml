@@ -1,0 +1,21 @@
+db_clients:
+  core_banking:
+    db_type: postgres
+    db_name: bank_cbs
+    sql_file: query_dataset/cbs.sql
+  cards:
+    db_type: sqlite
+    db_path: query_dataset/cards.db
+  lending:
+    db_type: duckdb
+    db_path: query_dataset/lending.duckdb
+  payments:
+    db_type: sqlite
+    db_path: query_dataset/payments.db
+  crm:
+    db_type: mongo
+    db_name: bank_crm
+    dump_folder: query_dataset/bank_crm_dump
+  insurance:
+    db_type: duckdb
+    db_path: query_dataset/insurance.duckdb

@@ -1,0 +1,5 @@
+db_clients:
+  bank_live:
+    db_type: mongo
+    db_name: bank_live
+    dump_folder: query_dataset/bank_live_dump
